@@ -5,7 +5,7 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import dns from "dns";
 
-import createApiRoutes from "./routes/apiRoutes.js";
+import apiRoutes from "./routes/apiRoutes.js"; // <- renamed to reflect actual usage
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
 import moduleSchema from "./models/Module.js";
@@ -24,7 +24,7 @@ app.use("/templates", express.static("templates")); // serve certificates
 
 const PORT = process.env.PORT || 4000;
 
-// Connection options reused for clarity & maintainability
+// Common mongoose options
 const mongooseOptions = {
   bufferCommands: false,
   serverSelectionTimeoutMS: 10000,
@@ -74,14 +74,18 @@ async function setupConnections() {
     { key: "OR_courses", name: "OR_courses" },
     { key: "EN_courses", name: "EN_courses" },
   ];
-  await Promise.all(dbConfigs.map(({ key, name }) => connectDbWithFallback(key, name)));
+  await Promise.all(
+    dbConfigs.map(({ key, name }) => connectDbWithFallback(key, name))
+  );
 }
 
 // Start server
 setupConnections()
   .then(() => {
-    app.use("/api", createApiRoutes(models));
+    // ✅ Mount router correctly (no function call)
+    app.use("/api", apiRoutes(models));
 
+    // Root endpoint: simple overview
     app.get("/", (req, res) => {
       const endpoints = Object.keys(models)
         .map(
