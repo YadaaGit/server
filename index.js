@@ -87,14 +87,33 @@ setupConnections()
 
     // Root endpoint: simple overview
     app.get("/", (req, res) => {
-      const endpoints = Object.keys(models)
+      // Define the supported languages and main resources
+      const langs = ["en", "am", "or"]; // you can add more
+      const resources = [
+        "programs",
+        "courses",
+        "modules",
+        "sections",
+        "quizzes",
+        "images",
+      ];
+
+      // Generate the endpoint list
+      const endpoints = langs
         .map(
-          (db) =>
-            `<li>${db}: ${Object.keys(models[db])
-              .map((col) => `<a href="/api/${db}/${col}">${col}</a>`)
-              .join(", ")}</li>`
+          (lang) =>
+            `<li>${lang.toUpperCase()}:</li>
+        <ul>
+          ${resources
+            .map(
+              (r) =>
+                `<li><a href="/api/${lang}/${r}">${r} (list)</a> | <a href="/api/${lang}/${r}/:id">${r} (single)</a></li>`
+            )
+            .join("")}
+        </ul>`
         )
         .join("");
+
       res.send(`<h1>API Endpoints</h1><ul>${endpoints}</ul>`);
     });
 
