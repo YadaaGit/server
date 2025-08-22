@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="certificate.css" />
+  </head>
+  <body>
+    <div class="certificate">
+      <div class="title">CERTIFICATE</div>
+      <div class="subtitle">OF APPRECIATION</div>
+      <div class="presented">THIS CERTIFICATE IS PRESENTED TO :</div>
+      <div class="name">{{USER_NAME}}</div>
+      <div class="text">
+        This is to certify that <strong>{{USER_NAME}}</strong> has successfully completed the course
+        "<strong>{{COURSE_TITLE}}</strong>" on <strong>{{DATE}}</strong> with a final score of
+        <strong>{{SCORE}}%</strong>. We recognize their dedication and commendable performance!
+      </div>
+      <div class="footer">
+        <div class="issuer">YADAA OROMOMIA</div>
+        <div class="cert-id">Certificate ID: {{CERT_ID}}</div>
+      </div>
+      <img class="qr" src="{{QR_CODE}}" alt="QR Code" />
+    </div>
+  </body>
+</html>

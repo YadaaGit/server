@@ -1,0 +1,78 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.certificate {
+  width: 1123px;
+  height: 794px;
+  background: url("assets/certificate-bg.png") no-repeat center center;
+  background-size: cover;
+  font-family: 'Georgia', serif;
+  position: relative;
+  padding: 80px;
+  box-sizing: border-box;
+  text-align: center;
+  color: #3d2c12;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-top: 10px;
+}
+
+.presented {
+  font-size: 16px;
+  color: #9c6b1f;
+  margin-top: 30px;
+}
+
+.name {
+  font-size: 38px;
+  font-family: 'Brush Script MT', cursive;
+  margin: 20px 0;
+  border-bottom: 1px solid #000;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.text {
+  font-size: 16px;
+  margin: 30px auto;
+  width: 80%;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.footer {
+  position: absolute;
+  bottom: 80px;
+  width: 100%;
+  padding: 0 80px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.issuer {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.cert-id {
+  text-align: right;
+}
+
+.qr {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  bottom: 75px;
+  right: 90px;
+}
