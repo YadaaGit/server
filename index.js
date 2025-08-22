@@ -5,26 +5,23 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import dns from "dns";
 
-import apiRoutes from "./routes/apiRoutes.js"; // <- renamed to reflect actual usage
+import apiRoutes from "./routes/apiRoutes.js";
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
 import moduleSchema from "./models/Module.js";
 import finalQuizSchema from "./models/FinalQuiz.js";
 import imageSchema from "./models/Image.js";
 
-// Prefer IPv4 to avoid Node 22 + MongoDB Atlas DNS issues
 dns.setDefaultResultOrder("ipv4first");
-
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use("/templates", express.static("templates")); // serve certificates
+app.use("/templates", express.static("templates"));
 
 const PORT = process.env.PORT || 4000;
 
-// Common mongoose options
 const mongooseOptions = {
   bufferCommands: false,
   serverSelectionTimeoutMS: 10000,
@@ -38,20 +35,15 @@ const models = {};
 async function connectDbWithFallback(dbKey, dbName) {
   const srvUri = process.env.MONGO_URI_SRV;
   const nonSrvUri =
-    process.env[`MONGO_URI_NONSRV_${dbKey.split("_")[0]}`] ||
-    process.env.MONGO_URI_NONSRV;
+    process.env[`MONGO_URI_NONSRV_${dbKey.split("_")[0]}`] || process.env.MONGO_URI_NONSRV;
 
   try {
     console.log(chalk.blue(`[${dbKey}] Attempting SRV connection...`));
-    connections[dbKey] = await mongoose
-      .createConnection(srvUri, { ...mongooseOptions, dbName })
-      .asPromise();
+    connections[dbKey] = await mongoose.createConnection(srvUri, { ...mongooseOptions, dbName }).asPromise();
     console.log(chalk.green(`[${dbKey}] Connected via SRV URI`));
   } catch (err) {
     console.warn(chalk.yellow(`[${dbKey}] SRV failed, trying non-SRV...`));
-    connections[dbKey] = await mongoose
-      .createConnection(nonSrvUri, { ...mongooseOptions, dbName })
-      .asPromise();
+    connections[dbKey] = await mongoose.createConnection(nonSrvUri, { ...mongooseOptions, dbName }).asPromise();
     console.log(chalk.green(`[${dbKey}] Connected via non-SRV URI`));
   }
 
@@ -59,11 +51,7 @@ async function connectDbWithFallback(dbKey, dbName) {
     programs: connections[dbKey].model("Program", programSchema, "programs"),
     courses: connections[dbKey].model("Course", courseSchema, "courses"),
     modules: connections[dbKey].model("Module", moduleSchema, "modules"),
-    final_quiz: connections[dbKey].model(
-      "FinalQuiz",
-      finalQuizSchema,
-      "final_quiz"
-    ),
+    final_quiz: connections[dbKey].model("FinalQuiz", finalQuizSchema, "final_quiz"),
     images: connections[dbKey].model("Image", imageSchema, "images"),
   };
 }
@@ -74,42 +62,29 @@ async function setupConnections() {
     { key: "OR_courses", name: "OR_courses" },
     { key: "EN_courses", name: "EN_courses" },
   ];
-  await Promise.all(
-    dbConfigs.map(({ key, name }) => connectDbWithFallback(key, name))
-  );
+  await Promise.all(dbConfigs.map(({ key, name }) => connectDbWithFallback(key, name)));
 }
 
 // Start server
 setupConnections()
   .then(() => {
-    // ✅ Mount router correctly (no function call)
+    // Mount API routes
     app.use("/api", apiRoutes(models));
 
-    // Root endpoint: simple overview
+    // Root endpoint
     app.get("/", (req, res) => {
-      // Define the supported languages and main resources
-      const langs = ["en", "am", "or"]; // you can add more
-      const resources = [
-        "programs",
-        "courses",
-        "modules",
-        "final_quiz",
-        "images",
-      ];
+      const langs = ["en", "am", "or"];
+      const resources = ["programs", "courses", "modules", "final_quiz", "images"];
 
-      // Generate the endpoint list
       const endpoints = langs
         .map(
           (lang) =>
             `<li>${lang.toUpperCase()}:</li>
-        <ul>
-          ${resources
-            .map(
-              (r) =>
-                `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`
-            )
-            .join("")}
-        </ul>`
+             <ul>
+               ${resources
+                 .map((r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`)
+                 .join("")}
+             </ul>`
         )
         .join("");
 
