@@ -93,8 +93,7 @@ setupConnections()
         "programs",
         "courses",
         "modules",
-        "sections",
-        "quizzes",
+        "final_quiz",
         "images",
       ];
 
@@ -107,7 +106,7 @@ setupConnections()
           ${resources
             .map(
               (r) =>
-                `<li><a href="/api/${lang}/${r}">${r} (list)</a> | <a href="/api/${lang}/${r}/:id">${r} (single)</a></li>`
+                `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`
             )
             .join("")}
         </ul>`
