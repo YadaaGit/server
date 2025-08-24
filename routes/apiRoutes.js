@@ -41,9 +41,9 @@ export default function apiRoutes(models) {
    * GET /api/:lang/:resource/:id
    * Get single item by ID
    */
-  router.get("/:lang/:resource/:id", async (req, res) => {
+  router.get("/:lang/:resource/:uid", async (req, res) => {
     try {
-      const { lang, resource, id } = req.params;
+      const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
 
       if (!models[dbKey]) {
@@ -54,7 +54,7 @@ export default function apiRoutes(models) {
       if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const item = await Model.findById(id).lean();
+      const item = await Model.findOne({ uid }).lean();
 
       if (!item) return res.status(404).json({ error: "Item not found" });
 
@@ -69,9 +69,9 @@ export default function apiRoutes(models) {
    * GET /api/:lang/programs/:programId
    * Fetch full program object with nested courses, modules, final_quiz, and images
    */
-  router.get("/:lang/programs/:programId", async (req, res) => {
+  router.get("/:lang/programs/:uid", async (req, res) => {
     try {
-      const { lang, programId } = req.params;
+      const { lang, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
 
       if (!models[dbKey]) {
@@ -81,18 +81,18 @@ export default function apiRoutes(models) {
       const { programs, courses, modules, final_quiz, images } = models[dbKey];
 
       // --- Fetch program ---
-      const program = await programs.findOne({ program_id: programId }).lean();
+      const program = await programs.findOne({ uid: uid }).lean();
       if (!program) return res.status(404).json({ error: "Program not found" });
 
       // --- Fetch courses ---
       const courseIds = Object.values(program.courses_ids || {});
-      const foundCourses = await courses.find({ course_id: { $in: courseIds } }).lean();
+      const foundCourses = await courses.find({ uid: { $in: courseIds } }).lean();
 
       // --- Fetch modules per course ---
       const assembledCourses = await Promise.all(
         foundCourses.map(async (course) => {
           const moduleIds = Object.values(course.module_ids || {});
-          const foundModules = await modules.find({ module_id: { $in: moduleIds } }).lean();
+          const foundModules = await modules.find({ uid: { $in: moduleIds } }).lean();
           return { ...course, modules: foundModules };
         })
       );
@@ -156,9 +156,9 @@ export default function apiRoutes(models) {
    * PUT /api/:lang/:resource/:id
    * Update an item by ID
    */
-  router.put("/:lang/:resource/:id", async (req, res) => {
+  router.put("/:lang/:resource/:uid", async (req, res) => {
     try {
-      const { lang, resource, id } = req.params;
+      const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
 
       if (!models[dbKey]) {
@@ -169,7 +169,7 @@ export default function apiRoutes(models) {
       if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const updated = await Model.findByIdAndUpdate(id, req.body, { new: true }).lean();
+      const updated = await Model.findOneAndUpdate({ uid }, req.body, { new: true }).lean();
       if (!updated) return res.status(404).json({ error: "Item not found" });
 
       res.json(updated);
@@ -183,9 +183,9 @@ export default function apiRoutes(models) {
    * DELETE /api/:lang/:resource/:id
    * Delete an item by ID
    */
-  router.delete("/:lang/:resource/:id", async (req, res) => {
+  router.delete("/:lang/:resource/:uid", async (req, res) => {
     try {
-      const { lang, resource, id } = req.params;
+      const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
 
       if (!models[dbKey]) {
@@ -196,7 +196,7 @@ export default function apiRoutes(models) {
       if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const deleted = await Model.findByIdAndDelete(id).lean();
+      const deleted = await Model.findOneAndDelete({ uid }).lean();
       if (!deleted) return res.status(404).json({ error: "Item not found" });
 
       res.json({ success: true, deleted });

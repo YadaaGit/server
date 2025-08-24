@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const programSchema = new mongoose.Schema({
-  program_id: String,
+  uid: String,
   title: String,
   final_quiz_id: String,
   program_index: Number,
@@ -11,3 +11,4 @@ const programSchema = new mongoose.Schema({
 
 // Export the schema
 export default programSchema;
+

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const imageSchema = new mongoose.Schema({
-  image_id: String,
+  uid: String,
   for: String,
   title: String,
   coverImage: Buffer,

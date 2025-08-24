@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const moduleSchema = new mongoose.Schema({
-  module_id: String,
+  uid: String,
   title: String,
   module_index: Number,
   content: Array,

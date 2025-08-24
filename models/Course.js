@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const courseSchema = new mongoose.Schema({
-  course_id: String,
+  uid: String,
   title: String,
   description: String,
   course_index: Number,
