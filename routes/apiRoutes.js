@@ -1,5 +1,10 @@
 // routes/apiRoutes.js
 import express from "express";
+import multer from "multer";
+import crypto from "crypto"; // Needed for randomUUID
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 export default function apiRoutes(models) {
   const router = express.Router();
@@ -202,6 +207,64 @@ export default function apiRoutes(models) {
       res.json({ success: true, deleted });
     } catch (err) {
       console.error("❌ Error deleting resource:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  /**
+   * POST /api/:lang/images
+   * Upload image (multipart/form-data)
+   */
+  router.post("/:lang/images", upload.single("image"), async (req, res) => {
+    try {
+      const { lang } = req.params;
+      const dbKey = `${lang.toUpperCase()}_courses`;
+
+      if (!models[dbKey]) {
+        return res.status(400).json({ error: "Invalid language collection" });
+      }
+
+      const Images = models[dbKey].images;
+
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+      const newImage = new Images({
+        uid: crypto.randomUUID(),
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+        data: req.file.buffer,
+      });
+
+      await newImage.save();
+      res.status(201).json({ uid: newImage.uid });
+    } catch (err) {
+      console.error("❌ Error uploading image:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  /**
+   * GET /api/:lang/images/:uid
+   * Serve image by ID
+   */
+  router.get("/:lang/images/:uid", async (req, res) => {
+    try {
+      const { lang, uid } = req.params;
+      const dbKey = `${lang.toUpperCase()}_courses`;
+
+      if (!models[dbKey]) {
+        return res.status(400).json({ error: "Invalid language collection" });
+      }
+
+      const Images = models[dbKey].images;
+      const image = await Images.findOne({ uid });
+
+      if (!image) return res.status(404).json({ error: "Image not found" });
+
+      res.set("Content-Type", image.contentType);
+      res.send(image.data);
+    } catch (err) {
+      console.error("❌ Error fetching image:", err);
       res.status(500).json({ error: "Server error" });
     }
   });
