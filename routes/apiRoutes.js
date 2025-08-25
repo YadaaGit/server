@@ -31,7 +31,8 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const items = await Model.find({}).lean();
@@ -56,7 +57,8 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const item = await Model.findOne({ uid }).lean();
@@ -91,13 +93,17 @@ export default function apiRoutes(models) {
 
       // --- Fetch courses ---
       const courseIds = Object.values(program.courses_ids || {});
-      const foundCourses = await courses.find({ uid: { $in: courseIds } }).lean();
+      const foundCourses = await courses
+        .find({ uid: { $in: courseIds } })
+        .lean();
 
       // --- Fetch modules per course ---
       const assembledCourses = await Promise.all(
         foundCourses.map(async (course) => {
           const moduleIds = Object.values(course.module_ids || {});
-          const foundModules = await modules.find({ uid: { $in: moduleIds } }).lean();
+          const foundModules = await modules
+            .find({ uid: { $in: moduleIds } })
+            .lean();
           return { ...course, modules: foundModules };
         })
       );
@@ -135,24 +141,34 @@ export default function apiRoutes(models) {
    * POST /api/:lang/:resource
    * Create a new item in a resource
    */
-  router.post("/:lang/:resource", async (req, res) => {
+  router.post("/:lang/images", upload.single("image"), async (req, res) => {
     try {
-      const { lang, resource } = req.params;
+      const { lang } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
 
-      if (!models[dbKey]) {
+      if (!models[dbKey])
         return res.status(400).json({ error: "Invalid language collection" });
-      }
 
-      const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      const Images = models[dbKey].images;
 
-      const Model = models[dbKey][modelName];
-      const item = new Model(req.body);
-      await item.save();
-      res.status(201).json(item);
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+      const originalName = req.file.originalname;
+      const splitName = originalName.split(" ");
+      const filename = splitName[1] || splitName[0];
+
+      const newImage = new Images({
+        uid: crypto.randomUUID(),
+        filename,
+        contentType: req.file.mimetype,
+        data: req.file.buffer, // required!
+        // createdAt will default to Date.now
+      });
+
+      await newImage.save();
+      res.status(201).json({ uid: newImage.uid });
     } catch (err) {
-      console.error("❌ Error creating resource:", err);
+      console.error("❌ Error uploading image:", err);
       res.status(500).json({ error: "Server error" });
     }
   });
@@ -171,10 +187,13 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const updated = await Model.findOneAndUpdate({ uid }, req.body, { new: true }).lean();
+      const updated = await Model.findOneAndUpdate({ uid }, req.body, {
+        new: true,
+      }).lean();
       if (!updated) return res.status(404).json({ error: "Item not found" });
 
       res.json(updated);
@@ -198,7 +217,8 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const deleted = await Model.findOneAndDelete({ uid }).lean();
