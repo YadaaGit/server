@@ -219,14 +219,20 @@ export default function apiRoutes(models) {
     try {
       const { lang } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
+      console.log("dbKey:", dbKey);
+      console.log("req.file:", req.file);
 
       if (!models[dbKey]) {
+        console.error("Invalid language collection:", dbKey);
         return res.status(400).json({ error: "Invalid language collection" });
       }
 
       const Images = models[dbKey].images;
 
-      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+      if (!req.file) {
+        console.error("No file uploaded");
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
       const newImage = new Images({
         uid: crypto.randomUUID(),
