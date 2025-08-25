@@ -295,5 +295,46 @@ export default function apiRoutes(models) {
     }
   });
 
+  /**
+   * POST /api/:lang/:resource
+   * Create a new item in a resource (non-image resources)
+   */
+  router.post("/:lang/:resource", async (req, res) => {
+    try {
+      const { lang, resource } = req.params;
+      const dbKey = `${lang.toUpperCase()}_courses`; // e.g. EN_courses
+
+      if (!models[dbKey]) {
+        return res.status(400).json({ error: "Invalid language collection" });
+      }
+
+      if (resource === "images") {
+        return res
+          .status(400)
+          .json({ error: "Use /images endpoint for image uploads" });
+      }
+
+      const modelName = resourceMap[resource];
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
+
+      const Model = models[dbKey][modelName];
+
+      // Generate a UID automatically if the schema has uid field
+      const bodyWithUid = {
+        uid: crypto.randomUUID(),
+        ...req.body,
+      };
+
+      const item = new Model(bodyWithUid);
+      await item.save();
+
+      res.status(201).json(item);
+    } catch (err) {
+      console.error("❌ Error creating resource:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
   return router;
 }
