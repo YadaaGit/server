@@ -7,7 +7,6 @@ import dotenv from "dotenv";
 import dns from "dns";
 
 import apiRoutes from "./routes/apiRoutes.js";
-import certificateRoutes from "./routes/CertificateRoutes.js";
 
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
@@ -95,8 +94,8 @@ async function setupConnections() {
 // Start server
 setupConnections()
   .then(() => {
+    // Use combined routes for both API and certificates
     app.use("/api", apiRoutes(models));
-    app.use("/api/certificates", certificateRoutes(models));
 
     // Root endpoint
     app.get("/", (req, res) => {
@@ -109,9 +108,7 @@ setupConnections()
             `<li>${lang.toUpperCase()}:</li>
              <ul>
                ${resources
-                 .map(
-                   (r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`
-                 )
+                 .map((r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`)
                  .join("")}
              </ul>`
         )
@@ -121,7 +118,7 @@ setupConnections()
                 <ul>${endpoints}</ul>
                 <h2>Certificates</h2>
                 <ul>
-                  <li><a href="/api/certificates/test">Certificate Example</a></li>
+                  <li><a href="/api/certificates/issue">Issue Certificate</a></li>
                 </ul>`);
     });
 
