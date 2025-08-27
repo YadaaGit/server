@@ -5,21 +5,30 @@
     <link rel="stylesheet" href="certificate.css" />
   </head>
   <body>
-    <div class="certificate">
-      <div class="title">CERTIFICATE</div>
-      <div class="subtitle">OF APPRECIATION</div>
-      <div class="presented">THIS CERTIFICATE IS PRESENTED TO :</div>
-      <div class="name">{{USER_NAME}}</div>
-      <div class="text">
-        This is to certify that <strong>{{USER_NAME}}</strong> has successfully completed the course
-        "<strong>{{COURSE_TITLE}}</strong>" on <strong>{{DATE}}</strong> with a final score of
-        <strong>{{SCORE}}%</strong>. We recognize their dedication and commendable performance!
+    <div class="wrapper">
+      <div class="upper_logo_band">
+        <img class="logo" src="./assets/1.png" alt="Logo" />
+        <img class="logo" src="./assets/2.png" alt="Logo" />
+        <img class="logo" src="./assets/3.png" alt="Logo" />
+        <img class="logo" src="./assets/4.png" alt="Logo" />
       </div>
-      <div class="footer">
-        <div class="issuer">YADAA OROMOMIA</div>
-        <div class="cert-id">Certificate ID: {{CERT_ID}}</div>
+      <div class="certificate_body">
+        <div class="name">{{USER_NAME}}</div>
+        <div class="text">
+          This is to certify that <strong>{{USER_NAME}}</strong> has
+          successfully completed the course "<strong>{{COURSE_TITLE}}</strong>"
+          on <strong>{{DATE}}</strong> with a final score of
+          <strong>{{SCORE}}%</strong>. We recognize their dedication and
+          commendable performance!
+        </div>
+        <div class="qr_code_place_holder">
+          <img src="{{QR_CODE}}" alt="QR Code" width="300" height="300" />
+        </div>
       </div>
-      <img class="qr" src="{{QR_CODE}}" alt="QR Code" />
+      <div class="lower_logo_band">
+        <img class="logo" src="./assets/5.png" alt="Logo" />
+        <img class="logo" src="./assets/6.png" alt="Logo" />
+      </div>
     </div>
   </body>
 </html>

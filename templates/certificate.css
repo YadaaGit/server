@@ -1,78 +1,87 @@
 body {
+  width: 3508px;
+  height: 2480px;
   margin: 0;
   padding: 0;
 }
 
-.certificate {
-  width: 1123px;
-  height: 794px;
-  background: url("assets/certificate-bg.png") no-repeat center center;
-  background-size: cover;
-  font-family: 'Georgia', serif;
+.wrapper {
+  width: 3508px;
+  height: 2480px;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+}
+
+.upper_logo_band {
   position: relative;
-  padding: 80px;
-  box-sizing: border-box;
-  text-align: center;
-  color: #3d2c12;
+  top: 0px;
+  width: 3508px;
+  height: 137px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.title {
-  font-size: 40px;
-  font-weight: bold;
+.certificate_body {
+  width: 3508px;
+  height: 2206px;
+  background: url("./assets/certificate-bg.png") no-repeat center center;
+  background-size: cover;
 }
 
-.subtitle {
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-top: 10px;
+.lower_logo_band {
+  position: relative;
+  bottom: 0px;
+  width: 3508px;
+  height: 137px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.presented {
-  font-size: 16px;
-  color: #9c6b1f;
-  margin-top: 30px;
+.logo {
+  width: 877px;
+  height: 137px;
+  object-fit: contain;
 }
 
 .name {
-  font-size: 38px;
-  font-family: 'Brush Script MT', cursive;
+  font-size: 80px;
+  font-family: "Brush Script MT", cursive;
   margin: 20px 0;
-  border-bottom: 1px solid #000;
   display: inline-block;
   padding-bottom: 5px;
+  position: absolute;
+  top: 1200px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  text-transform: capitalize;
+  letter-spacing: 8px;
+  color: #886229;
 }
 
 .text {
-  font-size: 16px;
+  font-size: 60px;
   margin: 30px auto;
-  width: 80%;
+  width: 52%;
   line-height: 1.6;
-  text-align: justify;
-}
-
-.footer {
+  text-align: center;
   position: absolute;
-  bottom: 80px;
-  width: 100%;
-  padding: 0 80px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
+  top: 1405px;
+  transform: translate(47%, 0px);
 }
 
-.issuer {
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.cert-id {
-  text-align: right;
-}
-
-.qr {
+.qr_code_place_holder {
+  width: 300px;
+  height: 300px;
+  border-radius: 10px;
+  background-color: rgb(43, 43, 43);
   position: absolute;
-  width: 80px;
-  height: 80px;
-  bottom: 75px;
-  right: 90px;
+  top: 1850px;
+  right: 890px;
 }

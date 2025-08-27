@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,11 +7,14 @@ import dotenv from "dotenv";
 import dns from "dns";
 
 import apiRoutes from "./routes/apiRoutes.js";
+import certificateRoutes from "./routes/CertificateRoutes.js";
+
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
 import moduleSchema from "./models/Module.js";
 import finalQuizSchema from "./models/FinalQuiz.js";
 import imageSchema from "./models/Image.js";
+import certificateSchema from "./models/Certificate.js";
 
 dns.setDefaultResultOrder("ipv4first");
 dotenv.config();
@@ -19,6 +23,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/templates", express.static("templates"));
+app.use("/certificates", express.static("certificates"));
 
 const PORT = process.env.PORT || 4000;
 
@@ -32,44 +37,66 @@ const mongooseOptions = {
 const connections = {};
 const models = {};
 
-async function connectDbWithFallback(dbKey, dbName) {
+async function connectDbWithFallback(dbKey, dbName, schemas) {
   const srvUri = process.env.MONGO_URI_SRV;
   const nonSrvUri =
-    process.env[`MONGO_URI_NONSRV_${dbKey.split("_")[0]}`] || process.env.MONGO_URI_NONSRV;
+    process.env[`MONGO_URI_NONSRV_${dbKey.split("_")[0]}`] ||
+    process.env.MONGO_URI_NONSRV;
 
   try {
     console.log(chalk.blue(`[${dbKey}] Attempting SRV connection...`));
-    connections[dbKey] = await mongoose.createConnection(srvUri, { ...mongooseOptions, dbName }).asPromise();
+    connections[dbKey] = await mongoose
+      .createConnection(srvUri, { ...mongooseOptions, dbName })
+      .asPromise();
     console.log(chalk.green(`[${dbKey}] Connected via SRV URI`));
   } catch (err) {
     console.warn(chalk.yellow(`[${dbKey}] SRV failed, trying non-SRV...`));
-    connections[dbKey] = await mongoose.createConnection(nonSrvUri, { ...mongooseOptions, dbName }).asPromise();
+    connections[dbKey] = await mongoose
+      .createConnection(nonSrvUri, { ...mongooseOptions, dbName })
+      .asPromise();
     console.log(chalk.green(`[${dbKey}] Connected via non-SRV URI`));
   }
 
-  models[dbKey] = {
-    programs: connections[dbKey].model("Program", programSchema, "programs"),
-    courses: connections[dbKey].model("Course", courseSchema, "courses"),
-    modules: connections[dbKey].model("Module", moduleSchema, "modules"),
-    final_quiz: connections[dbKey].model("FinalQuiz", finalQuizSchema, "final_quiz"),
-    images: connections[dbKey].model("Image", imageSchema, "images"),
-  };
+  // Attach models dynamically for that DB
+  models[dbKey] = {};
+  for (const { name, schema, collection } of schemas) {
+    models[dbKey][name] = connections[dbKey].model(name, schema, collection);
+  }
 }
 
 async function setupConnections() {
-  const dbConfigs = [
-    { key: "AM_courses", name: "AM_courses" },
-    { key: "OR_courses", name: "OR_courses" },
-    { key: "EN_courses", name: "EN_courses" },
+  // Courses DBs
+  const courseSchemas = [
+    { name: "Program", schema: programSchema, collection: "programs" },
+    { name: "Course", schema: courseSchema, collection: "courses" },
+    { name: "Module", schema: moduleSchema, collection: "modules" },
+    { name: "FinalQuiz", schema: finalQuizSchema, collection: "final_quiz" },
+    { name: "Image", schema: imageSchema, collection: "images" },
   ];
-  await Promise.all(dbConfigs.map(({ key, name }) => connectDbWithFallback(key, name)));
+
+  const dbConfigs = [
+    { key: "AM_courses", name: "AM_courses", schemas: courseSchemas },
+    { key: "OR_courses", name: "OR_courses", schemas: courseSchemas },
+    { key: "EN_courses", name: "EN_courses", schemas: courseSchemas },
+  ];
+
+  await Promise.all(
+    dbConfigs.map(({ key, name, schemas }) =>
+      connectDbWithFallback(key, name, schemas)
+    )
+  );
+
+  // Certificates DB
+  await connectDbWithFallback("CERTS", "Certificates", [
+    { name: "Certificate", schema: certificateSchema, collection: "certificates" },
+  ]);
 }
 
 // Start server
 setupConnections()
   .then(() => {
-    // Mount API routes
     app.use("/api", apiRoutes(models));
+    app.use("/api/certificates", certificateRoutes(models));
 
     // Root endpoint
     app.get("/", (req, res) => {
@@ -82,13 +109,20 @@ setupConnections()
             `<li>${lang.toUpperCase()}:</li>
              <ul>
                ${resources
-                 .map((r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`)
+                 .map(
+                   (r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`
+                 )
                  .join("")}
              </ul>`
         )
         .join("");
 
-      res.send(`<h1>API Endpoints</h1><ul>${endpoints}</ul>`);
+      res.send(`<h1>API Endpoints</h1>
+                <ul>${endpoints}</ul>
+                <h2>Certificates</h2>
+                <ul>
+                  <li><a href="/api/certificates/test">Certificate Example</a></li>
+                </ul>`);
     });
 
     app.listen(PORT, () => {
