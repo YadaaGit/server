@@ -1,4 +1,4 @@
-// server.js
+// index.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -56,7 +56,7 @@ async function connectDbWithFallback(dbKey, dbName, schemas) {
     console.log(chalk.green(`[${dbKey}] Connected via non-SRV URI`));
   }
 
-  // Attach models dynamically for that DB
+  // Attach models dynamically
   models[dbKey] = {};
   for (const { name, schema, collection } of schemas) {
     models[dbKey][name] = connections[dbKey].model(name, schema, collection);
@@ -64,7 +64,6 @@ async function connectDbWithFallback(dbKey, dbName, schemas) {
 }
 
 async function setupConnections() {
-  // Courses DBs
   const courseSchemas = [
     { name: "Program", schema: programSchema, collection: "programs" },
     { name: "Course", schema: courseSchema, collection: "courses" },
@@ -94,7 +93,6 @@ async function setupConnections() {
 // Start server
 setupConnections()
   .then(() => {
-    // Use combined routes for both API and certificates
     app.use("/api", apiRoutes(models));
 
     // Root endpoint
