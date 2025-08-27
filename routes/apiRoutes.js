@@ -21,17 +21,21 @@ export default function combinedRoutes(models) {
     modules: "Module",
     final_quiz: "FinalQuiz",
     images: "Image",
+    issues: "issues",
   };
 
   // GET list
   router.get("/:lang/:resource", async (req, res) => {
     try {
       const { lang, resource } = req.params;
-      const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      const dbKey =
+        lang == "certificates" ? lang : `${lang.toUpperCase()}_courses`;
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const items = await Model.find({}).lean();
@@ -47,10 +51,12 @@ export default function combinedRoutes(models) {
     try {
       const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const item = await Model.findOne({ uid }).lean();
@@ -68,11 +74,16 @@ export default function combinedRoutes(models) {
     try {
       const { lang, resource } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
-      if (resource === "images") return res.status(400).json({ error: "Use /images endpoint for images" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
+      if (resource === "images")
+        return res
+          .status(400)
+          .json({ error: "Use /images endpoint for images" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const bodyWithUid = { uid: crypto.randomUUID(), ...req.body };
@@ -91,13 +102,17 @@ export default function combinedRoutes(models) {
     try {
       const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const updated = await Model.findOneAndUpdate({ uid }, req.body, { new: true }).lean();
+      const updated = await Model.findOneAndUpdate({ uid }, req.body, {
+        new: true,
+      }).lean();
       if (!updated) return res.status(404).json({ error: "Item not found" });
 
       res.json(updated);
@@ -112,10 +127,12 @@ export default function combinedRoutes(models) {
     try {
       const { lang, resource, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const deleted = await Model.findOneAndDelete({ uid }).lean();
@@ -133,7 +150,8 @@ export default function combinedRoutes(models) {
     try {
       const { lang } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const Images = models[dbKey].images;
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -158,7 +176,8 @@ export default function combinedRoutes(models) {
     try {
       const { lang, uid } = req.params;
       const dbKey = `${lang.toUpperCase()}_courses`;
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid language collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language collection" });
 
       const Images = models[dbKey].images;
       const image = await Images.findOne({ uid });
@@ -185,19 +204,38 @@ export default function combinedRoutes(models) {
         }
 
         const verificationUrl = `${process.env.BASE_URL}/api/certificates/${certId}`;
-        const certDoc = new Certificate({ userName, courseTitle, score, certId, issuedAt: new Date(), verificationUrl });
+        const certDoc = new Certificate({
+          userName,
+          courseTitle,
+          score,
+          certId,
+          issuedAt: new Date(),
+          verificationUrl,
+        });
         await certDoc.save();
 
-        const pdfBuffer = await generateCertificatePDF({ userName, courseTitle, score, certId, verificationUrl });
+        const pdfBuffer = await generateCertificatePDF({
+          userName,
+          courseTitle,
+          score,
+          certId,
+          verificationUrl,
+        });
         const pdfDir = path.join(process.cwd(), "certificates");
         if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir);
         const pdfPath = path.join(pdfDir, `${certId}.pdf`);
         fs.writeFileSync(pdfPath, pdfBuffer);
 
-        res.json({ ok: true, certificate: certDoc, pdfUrl: `/certificates/${certId}.pdf` });
+        res.json({
+          ok: true,
+          certificate: certDoc,
+          pdfUrl: `/certificates/${certId}.pdf`,
+        });
       } catch (err) {
         console.error("❌ Error issuing certificate:", err);
-        res.status(500).json({ ok: false, error: "Failed to issue certificate" });
+        res
+          .status(500)
+          .json({ ok: false, error: "Failed to issue certificate" });
       }
     });
 

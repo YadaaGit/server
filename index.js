@@ -118,7 +118,7 @@ setupConnections()
                 <ul>${endpoints}</ul>
                 <h2>Certificates</h2>
                 <ul>
-                  <li><a href="/api/certificates/issue">Issue Certificate</a></li>
+                  <li><a href="/api/certificates/issues">Issue Certificate</a></li>
                 </ul>`);
     });
 
