@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import puppeteer from "puppeteer";
 import QRCode from "qrcode";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +43,10 @@ export async function generateCertificateImage({
     .replace(/{{CERT_ID}}/g, certId)
     .replace(/{{QR_CODE}}/g, qrDataUrl);
 
+  // Write temporary HTML file
+  const tempHtmlPath = path.join(os.tmpdir(), `${certId}.html`);
+  fs.writeFileSync(tempHtmlPath, html);
+
   // Launch Puppeteer
   const browser = await puppeteer.launch({
     headless: "new",
@@ -49,18 +54,25 @@ export async function generateCertificateImage({
   });
   const page = await browser.newPage();
 
-  // Set viewport to exact pixel dimensions
+  // Set viewport
   await page.setViewport({
     width: 3508,
     height: 2480,
-    deviceScaleFactor: 1, // change to 2 or 3 if you want retina-quality
+    deviceScaleFactor: 1,
   });
 
-  await page.setContent(html, { waitUntil: "networkidle0" });
+  // Use page.goto() instead of setContent()
+  await page.goto(pathToFileURL(tempHtmlPath).href, {
+    waitUntil: "networkidle0",
+  });
 
-  // Take a screenshot
+  // Take screenshot
   const imageBuffer = await page.screenshot({ type: "png", fullPage: true });
 
   await browser.close();
-  return imageBuffer; // returns a PNG buffer
+
+  // Remove temp file
+  fs.unlinkSync(tempHtmlPath);
+
+  return imageBuffer;
 }
