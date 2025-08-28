@@ -8,10 +8,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function formatDate(date) {
-  return new Date(date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
-export async function generateCertificatePDF({
+export async function generateCertificateImage({
   userName,
   courseTitle,
   score,
@@ -19,14 +23,14 @@ export async function generateCertificatePDF({
   verificationUrl,
   issueDate = new Date(),
 }) {
-  // Load template + css
-  const htmlPath = path.join("./templates/certificate.html");
-  let html       = fs.readFileSync(htmlPath, "utf8");
+  // Load template
+  const htmlPath = path.join(__dirname, "../templates/certificate.html");
+  let html = fs.readFileSync(htmlPath, "utf8");
 
-  // Fix relative asset paths to absolute file:// URLs so Puppeteer can embed them
-  const assetsDir  = path.join("./templates/assets");
-  const assetsFile = pathToFileURL(assetsDir).href;                // file:///.../assets
-
+  // Fix asset paths
+  const assetsDir = path.join(__dirname, "../templates/assets");
+  const assetsFile = pathToFileURL(assetsDir).href;
+  html = html.replace(/\.\/assets\//g, `${assetsFile}/`);
 
   // Inject data
   const qrDataUrl = await QRCode.toDataURL(verificationUrl);
@@ -38,23 +42,25 @@ export async function generateCertificatePDF({
     .replace(/{{CERT_ID}}/g, certId)
     .replace(/{{QR_CODE}}/g, qrDataUrl);
 
-  // Render with Puppeteer
+  // Launch Puppeteer
   const browser = await puppeteer.launch({
     headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
 
-  // Inline CSS so we don't need network fetches
-  await page.setContent(html, { waitUntil: "networkidle0" });
-  await page.emulateMediaType("screen");
-
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    landscape: true,
-    printBackground: true,
+  // Set viewport to exact pixel dimensions
+  await page.setViewport({
+    width: 3508,
+    height: 2480,
+    deviceScaleFactor: 1, // change to 2 or 3 if you want retina-quality
   });
 
+  await page.setContent(html, { waitUntil: "networkidle0" });
+
+  // Take a screenshot
+  const imageBuffer = await page.screenshot({ type: "png", fullPage: true });
+
   await browser.close();
-  return pdfBuffer;
+  return imageBuffer; // returns a PNG buffer
 }

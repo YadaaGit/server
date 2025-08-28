@@ -5,7 +5,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-import { generateCertificatePDF } from "../utils/generateCertificatePDF.js";
+import { generateCertificateImage } from "../utils/generateCertificatePDF.js";
 
 dotenv.config();
 const storage = multer.memoryStorage();
@@ -56,7 +56,7 @@ export default function apiRoutes(models) {
         });
         await certDoc.save();
 
-        const pdfBuffer = await generateCertificatePDF({
+        const imageBuffer = await generateCertificateImage({
           userName,
           courseTitle,
           score,
@@ -71,7 +71,7 @@ export default function apiRoutes(models) {
         res.json({
           ok: true,
           certificate: certDoc,
-          pdfUrl: `/certificates/${certId}.pdf`,
+          imageUrl: `/certificates/${certId}.png`,
         });
       } catch (err) {
         console.error("❌ Error issuing certificate:", err);
@@ -99,14 +99,14 @@ export default function apiRoutes(models) {
     });
 
     // Get certificate PDF dynamically
-    router.get("/certificates/:certId/pdf", async (req, res) => {
+    router.get("/certificates/:certId/image", async (req, res) => {
       try {
         const { certId } = req.params;
         const cert = await Certificate.findOne({ certId });
         if (!cert)
           return res.status(404).json({ error: "Certificate not found" });
 
-        const pdfBuffer = await generateCertificatePDF({
+        const imageBuffer = await generateCertificateImage({
           userName: cert.userName,
           courseTitle: cert.courseTitle,
           score: cert.score,
@@ -116,13 +116,13 @@ export default function apiRoutes(models) {
         });
 
         res.set({
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `inline; filename="${cert.certId}.pdf"`,
+          "Content-Type": "image/png",
+          "Content-Disposition": `inline; filename="${cert.certId}.png"`,
         });
-        res.send(pdfBuffer);
+        res.send(imageBuffer);
       } catch (err) {
-        console.error("PDF generation failed:", err);
-        res.status(500).json({ error: "Failed to generate certificate PDF" });
+        console.error("Image generation failed:", err);
+        res.status(500).json({ error: "Failed to generate certificate image" });
       }
     });
   }
