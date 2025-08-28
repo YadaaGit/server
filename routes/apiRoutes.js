@@ -12,7 +12,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const FrontbaseUrl = process.env.FRONT_BASE_URL;
-const BackbaseUrl = process.env.BACK_BASE_URL;
+const BackbaseUrl = process.env.BACKEND_BASE_URL;
 
 export default function apiRoutes(models) {
   const router = express.Router();

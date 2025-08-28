@@ -7,12 +7,13 @@ import dotenv from "dotenv";
 import dns from "dns";
 
 import apiRoutes from "./routes/apiRoutes.js";
+import telegramRoutes from "./routes/TelegramRoutes.js";
 
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
 import moduleSchema from "./models/Module.js";
 import finalQuizSchema from "./models/FinalQuiz.js";
-import imageSchema from "./models/Image.js";
+import imageSchema from "./models/Image.js";  
 import certificateSchema from "./models/Certificate.js";
 
 dns.setDefaultResultOrder("ipv4first");
@@ -23,6 +24,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/templates", express.static("templates"));
 app.use("/certificates", express.static("certificates"));
+app.use("/api", telegramRoutes);
 const PORT = process.env.PORT || 4000;
 
 const mongooseOptions = {
@@ -85,7 +87,11 @@ async function setupConnections() {
 
   // Certificates DB
   await connectDbWithFallback("CERTS", "Certificates", [
-    { name: "Certificate", schema: certificateSchema, collection: "certificates" },
+    {
+      name: "Certificate",
+      schema: certificateSchema,
+      collection: "certificates",
+    },
   ]);
 }
 
@@ -97,7 +103,13 @@ setupConnections()
     // Root endpoint
     app.get("/", (req, res) => {
       const langs = ["en", "am", "or"];
-      const resources = ["programs", "courses", "modules", "final_quiz", "images"];
+      const resources = [
+        "programs",
+        "courses",
+        "modules",
+        "final_quiz",
+        "images",
+      ];
 
       const endpoints = langs
         .map(
@@ -105,7 +117,9 @@ setupConnections()
             `<li>${lang.toUpperCase()}:</li>
              <ul>
                ${resources
-                 .map((r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`)
+                 .map(
+                   (r) => `<li><a href="/api/${lang}/${r}">${r} (list)</a></li>`
+                 )
                  .join("")}
              </ul>`
         )
