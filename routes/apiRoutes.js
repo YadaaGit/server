@@ -64,9 +64,9 @@ export default function apiRoutes(models) {
           verificationUrl,
         });
 
-        const pdfDir = path.join(process.cwd(), "certificates");
-        if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir);
-        fs.writeFileSync(path.join(pdfDir, `${certId}.pdf`), pdfBuffer);
+        const pngDir = path.join(process.cwd(), "certificates");
+        if (!fs.existsSync(pngDir)) fs.mkdirSync(pngDir);
+        fs.writeFileSync(path.join(pngDir, `${certId}.png`), imageBuffer);
 
         res.json({
           ok: true,
@@ -81,7 +81,7 @@ export default function apiRoutes(models) {
       }
     });
 
-    // Serve static PDFs
+    // Serve static PNGs
     router.use("/certificates", express.static("certificates"));
 
     // Get certificate JSON
@@ -98,7 +98,7 @@ export default function apiRoutes(models) {
       }
     });
 
-    // Get certificate PDF dynamically
+    // Get certificate PNG dynamically
     router.get("/certificates/:certId/image", async (req, res) => {
       try {
         const { certId } = req.params;
