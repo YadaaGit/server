@@ -7,6 +7,7 @@ const CertificateSchema = new mongoose.Schema({
   certId: { type: String, unique: true },
   issueDate: { type: Date, default: Date.now },
   verificationUrl: String,
+  issueUrl: String,
 });
 
 export default CertificateSchema ;

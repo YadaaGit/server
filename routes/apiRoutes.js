@@ -10,7 +10,8 @@ import { generateCertificatePDF } from "../utils/generateCertificatePDF.js";
 dotenv.config();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-const baseUrl = process.env.FRONT_BASE_URL;
+const FrontbaseUrl = process.env.FRONT_BASE_URL;
+const BackbaseUrl = process.env.Back_BASE_URL;
 
 export default function apiRoutes(models) {
   const router = express.Router();
@@ -24,7 +25,6 @@ export default function apiRoutes(models) {
     images: "Image",
   };
 
-  // Utility to get DB key
   function getDbKey(lang) {
     if (lang.toLowerCase() === "certificates") return "CERTS";
     return `${lang.toUpperCase()}_courses`;
@@ -36,13 +36,9 @@ export default function apiRoutes(models) {
       const { lang, resource } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) {
-        return res
-          .status(400)
-          .json({ error: "Invalid language or collection" });
-      }
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language or collection" });
 
-      // Certificates list
       if (dbKey === "CERTS") {
         const Certificate = models.CERTS.Certificate;
         const items = await Certificate.find({}).lean();
@@ -50,8 +46,7 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName)
-        return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const items = await Model.find({}).lean();
@@ -68,23 +63,18 @@ export default function apiRoutes(models) {
       const { lang, resource, uid } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) {
-        return res
-          .status(400)
-          .json({ error: "Invalid language or collection" });
-      }
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid language or collection" });
 
       if (dbKey === "CERTS") {
         const Certificate = models.CERTS.Certificate;
         const item = await Certificate.findOne({ certId: uid }).lean();
-        if (!item)
-          return res.status(404).json({ error: "Certificate not found" });
+        if (!item) return res.status(404).json({ error: "Certificate not found" });
         return res.json(item);
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName)
-        return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const item = await Model.findOne({ uid }).lean();
@@ -106,20 +96,14 @@ export default function apiRoutes(models) {
       if (!models[dbKey])
         return res.status(400).json({ error: "Invalid collection" });
 
-      if (dbKey === "CERTS") {
-        return res
-          .status(400)
-          .json({ error: "Use /certificates/issue to create a certificate" });
-      }
+      if (dbKey === "CERTS")
+        return res.status(400).json({ error: "Use /certificates to create a certificate" });
 
       if (resource === "images")
-        return res
-          .status(400)
-          .json({ error: "Use /images endpoint for images" });
+        return res.status(400).json({ error: "Use /images endpoint for images" });
 
       const modelName = resourceMap[resource];
-      if (!modelName)
-        return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const bodyWithUid = { uid: crypto.randomUUID(), ...req.body };
@@ -143,18 +127,13 @@ export default function apiRoutes(models) {
         return res.status(400).json({ error: "Invalid collection" });
 
       if (dbKey === "CERTS")
-        return res
-          .status(400)
-          .json({ error: "Cannot update certificate via API" });
+        return res.status(400).json({ error: "Cannot update certificate via API" });
 
       const modelName = resourceMap[resource];
-      if (!modelName)
-        return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const updated = await Model.findOneAndUpdate({ uid }, req.body, {
-        new: true,
-      }).lean();
+      const updated = await Model.findOneAndUpdate({ uid }, req.body, { new: true }).lean();
       if (!updated) return res.status(404).json({ error: "Item not found" });
 
       res.json(updated);
@@ -174,13 +153,10 @@ export default function apiRoutes(models) {
         return res.status(400).json({ error: "Invalid collection" });
 
       if (dbKey === "CERTS")
-        return res
-          .status(400)
-          .json({ error: "Cannot delete certificate via API" });
+        return res.status(400).json({ error: "Cannot delete certificate via API" });
 
       const modelName = resourceMap[resource];
-      if (!modelName)
-        return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const deleted = await Model.findOneAndDelete({ uid }).lean();
@@ -245,6 +221,7 @@ export default function apiRoutes(models) {
   if (models.CERTS && models.CERTS.Certificate) {
     const Certificate = models.CERTS.Certificate;
 
+    // Issue a certificate
     router.post("/certificates", async (req, res) => {
       try {
         const { userName, courseTitle, score, certId } = req.body;
@@ -252,13 +229,15 @@ export default function apiRoutes(models) {
           return res.status(400).json({ ok: false, error: "Missing fields" });
         }
 
-        const verificationUrl = `${baseUrl}/api/certificates/${certId}`;
+        const issueUrl = `${BackbaseUrl}/api/certificates/${certId}`;
+        const verificationUrl = `${FrontbaseUrl}/api/certificates/${certId}`;
         const certDoc = new Certificate({
           userName,
           courseTitle,
           score,
           certId,
           issueDate: new Date(),
+          issueUrl,
           verificationUrl,
         });
         await certDoc.save();
@@ -283,45 +262,40 @@ export default function apiRoutes(models) {
         });
       } catch (err) {
         console.error("❌ Error issuing certificate:", err);
-        res
-          .status(500)
-          .json({ ok: false, error: "Failed to issue certificate" });
+        res.status(500).json({ ok: false, error: "Failed to issue certificate" });
       }
     });
 
+    // Serve static PDFs
     router.use("/certificates", express.static("certificates"));
-  }
 
-  router.get("/certificates/:certId/pdf", async (req, res) => {
-    try {
-      const { certId } = req.params;
-      const cert = await Certificate.findOne({ certId });
+    // GET certificate PDF dynamically
+    router.get("/certificates/:certId/pdf", async (req, res) => {
+      try {
+        const { certId } = req.params;
+        const cert = await Certificate.findOne({ certId });
+        if (!cert) return res.status(404).json({ error: "Certificate not found" });
 
-      if (!cert) {
-        return res.status(404).json({ error: "Certificate not found" });
+        const pdfBuffer = await generateCertificatePDF({
+          userName: cert.userName,
+          courseTitle: cert.courseTitle,
+          score: cert.score,
+          certId: cert.certId,
+          issueDate: cert.issueDate,
+          verificationUrl: cert.verificationUrl,
+        });
+
+        res.set({
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `inline; filename="${cert.certId}.pdf"`,
+        });
+        res.send(pdfBuffer);
+      } catch (err) {
+        console.error("PDF generation failed:", err);
+        res.status(500).json({ error: "Failed to generate certificate PDF" });
       }
-
-      // Generate PDF from stored data
-      const pdfBuffer = await generateCertificatePDF({
-        userName: cert.userName,
-        courseTitle: cert.courseTitle,
-        score: cert.score,
-        certId: cert.certId,
-        issueDate: cert.issueDate,
-        verificationUrl: cert.verificationUrl
-      });
-
-      res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${cert.certId}.pdf"`,
-      });
-
-      res.send(pdfBuffer);
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-      res.status(500).json({ error: "Failed to generate certificate PDF" });
-    }
-  });
+    });
+  }
 
   return router;
 }
