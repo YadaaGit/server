@@ -20,13 +20,13 @@ export async function generateCertificatePDF({
   issueDate = new Date(),
 }) {
   // Load template + css
-  const htmlPath = path.join(__dirname, "../templates/certificate.html");
+  const htmlPath = path.join("./templates/certificate.html");
   let html       = fs.readFileSync(htmlPath, "utf8");
 
   // Fix relative asset paths to absolute file:// URLs so Puppeteer can embed them
-  const assetsDir  = path.join(__dirname, "../templates/assets");
+  const assetsDir  = path.join("./templates/assets");
   const assetsFile = pathToFileURL(assetsDir).href;                // file:///.../assets
-  html = html.replace(/\.\/assets\//g, `${assetsFile}/`);
+
 
   // Inject data
   const qrDataUrl = await QRCode.toDataURL(verificationUrl);
