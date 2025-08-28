@@ -1,28 +1,26 @@
 import express from "express";
 import fetch from "node-fetch";
-import fs from "fs";
-import FormData from "form-data";
-import path from "path";
 
 const router = express.Router();
 
 router.post("/send-document", async (req, res) => {
-  const { chatId, filePath, caption } = req.body;
+  const { chatId, fileUrl, caption } = req.body; // rename to fileUrl
   const botToken = process.env.BOT_TOKEN;
 
-  if (!chatId || !filePath) {
-    return res.status(400).json({ ok: false, error: "Missing chatId or filePath" });
+  if (!chatId || !fileUrl) {
+    return res.status(400).json({ ok: false, error: "Missing chatId or fileUrl" });
   }
 
   try {
-    const form = new FormData();
-    form.append("chat_id", chatId);
-    form.append("document", fs.createReadStream(path.resolve(filePath)));
-    if (caption) form.append("caption", caption);
-
+    // Telegram API accepts URLs directly
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
       method: "POST",
-      body: form,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        document: fileUrl,
+        caption: caption || "",
+      }),
     });
 
     const data = await response.json();
