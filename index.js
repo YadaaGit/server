@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import dns from "dns";
 
 import apiRoutes from "./routes/apiRoutes.js";
-import telegramRoutes from "./routes/TelegramRoutes.js";
+import telegramRoutes from "./routes/telegramRoutes.js";
 
 import programSchema from "./models/Program.js";
 import courseSchema from "./models/Course.js";
