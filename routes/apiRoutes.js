@@ -36,7 +36,9 @@ export default function apiRoutes(models) {
       const dbKey = getDbKey(lang);
 
       if (!models[dbKey]) {
-        return res.status(400).json({ error: "Invalid language or collection" });
+        return res
+          .status(400)
+          .json({ error: "Invalid language or collection" });
       }
 
       // Certificates list
@@ -47,7 +49,8 @@ export default function apiRoutes(models) {
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const items = await Model.find({}).lean();
@@ -65,18 +68,22 @@ export default function apiRoutes(models) {
       const dbKey = getDbKey(lang);
 
       if (!models[dbKey]) {
-        return res.status(400).json({ error: "Invalid language or collection" });
+        return res
+          .status(400)
+          .json({ error: "Invalid language or collection" });
       }
 
       if (dbKey === "CERTS") {
         const Certificate = models.CERTS.Certificate;
         const item = await Certificate.findOne({ certId: uid }).lean();
-        if (!item) return res.status(404).json({ error: "Certificate not found" });
+        if (!item)
+          return res.status(404).json({ error: "Certificate not found" });
         return res.json(item);
       }
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const item = await Model.findOne({ uid }).lean();
@@ -95,17 +102,23 @@ export default function apiRoutes(models) {
       const { lang, resource } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
 
       if (dbKey === "CERTS") {
-        return res.status(400).json({ error: "Use /certificates/issue to create a certificate" });
+        return res
+          .status(400)
+          .json({ error: "Use /certificates/issue to create a certificate" });
       }
 
       if (resource === "images")
-        return res.status(400).json({ error: "Use /images endpoint for images" });
+        return res
+          .status(400)
+          .json({ error: "Use /images endpoint for images" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const bodyWithUid = { uid: crypto.randomUUID(), ...req.body };
@@ -125,15 +138,22 @@ export default function apiRoutes(models) {
       const { lang, resource, uid } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
 
-      if (dbKey === "CERTS") return res.status(400).json({ error: "Cannot update certificate via API" });
+      if (dbKey === "CERTS")
+        return res
+          .status(400)
+          .json({ error: "Cannot update certificate via API" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
-      const updated = await Model.findOneAndUpdate({ uid }, req.body, { new: true }).lean();
+      const updated = await Model.findOneAndUpdate({ uid }, req.body, {
+        new: true,
+      }).lean();
       if (!updated) return res.status(404).json({ error: "Item not found" });
 
       res.json(updated);
@@ -149,12 +169,17 @@ export default function apiRoutes(models) {
       const { lang, resource, uid } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
 
-      if (dbKey === "CERTS") return res.status(400).json({ error: "Cannot delete certificate via API" });
+      if (dbKey === "CERTS")
+        return res
+          .status(400)
+          .json({ error: "Cannot delete certificate via API" });
 
       const modelName = resourceMap[resource];
-      if (!modelName) return res.status(404).json({ error: "Unknown resource" });
+      if (!modelName)
+        return res.status(404).json({ error: "Unknown resource" });
 
       const Model = models[dbKey][modelName];
       const deleted = await Model.findOneAndDelete({ uid }).lean();
@@ -173,7 +198,8 @@ export default function apiRoutes(models) {
       const { lang } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
 
       const Images = models[dbKey].images;
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -199,7 +225,8 @@ export default function apiRoutes(models) {
       const { lang, uid } = req.params;
       const dbKey = getDbKey(lang);
 
-      if (!models[dbKey]) return res.status(400).json({ error: "Invalid collection" });
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
 
       const Images = models[dbKey].images;
       const image = await Images.findOne({ uid });
@@ -217,7 +244,7 @@ export default function apiRoutes(models) {
   if (models.CERTS && models.CERTS.Certificate) {
     const Certificate = models.CERTS.Certificate;
 
-    router.post("/certificates/issue", async (req, res) => {
+    router.post("/certificates", async (req, res) => {
       try {
         const { userName, courseTitle, score, certId } = req.body;
         if (!userName || !courseTitle || !score || !certId) {
@@ -255,7 +282,9 @@ export default function apiRoutes(models) {
         });
       } catch (err) {
         console.error("❌ Error issuing certificate:", err);
-        res.status(500).json({ ok: false, error: "Failed to issue certificate" });
+        res
+          .status(500)
+          .json({ ok: false, error: "Failed to issue certificate" });
       }
     });
 
