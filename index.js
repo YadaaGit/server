@@ -23,7 +23,6 @@ app.use(cors());
 app.use(express.json());
 app.use("/templates", express.static("templates"));
 app.use("/certificates", express.static("certificates"));
-
 const PORT = process.env.PORT || 4000;
 
 const mongooseOptions = {

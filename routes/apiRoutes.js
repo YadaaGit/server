@@ -10,6 +10,7 @@ import { generateCertificatePDF } from "../utils/generateCertificatePDF.js";
 dotenv.config();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+const baseUrl = process.env.FRONT_BASE_URL;
 
 export default function apiRoutes(models) {
   const router = express.Router();
@@ -251,7 +252,7 @@ export default function apiRoutes(models) {
           return res.status(400).json({ ok: false, error: "Missing fields" });
         }
 
-        const verificationUrl = `${process.env.BASE_URL}/api/certificates/${certId}`;
+        const verificationUrl = `${baseUrl}/api/certificates/${certId}`;
         const certDoc = new Certificate({
           userName,
           courseTitle,
