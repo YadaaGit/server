@@ -258,7 +258,7 @@ export default function apiRoutes(models) {
           courseTitle,
           score,
           certId,
-          issuedAt: new Date(),
+          issueDate: new Date(),
           verificationUrl,
         });
         await certDoc.save();
@@ -291,6 +291,37 @@ export default function apiRoutes(models) {
 
     router.use("/certificates", express.static("certificates"));
   }
+
+  router.get("/certificates/:certId/pdf", async (req, res) => {
+    try {
+      const { certId } = req.params;
+      const cert = await Certificate.findOne({ certId });
+
+      if (!cert) {
+        return res.status(404).json({ error: "Certificate not found" });
+      }
+
+      // Generate PDF from stored data
+      const pdfBuffer = await generateCertificatePDF({
+        userName: cert.userName,
+        courseTitle: cert.courseTitle,
+        score: cert.score,
+        certId: cert.certId,
+        issueDate: cert.issueDate,
+        verificationUrl: cert.verificationUrl
+      });
+
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${cert.certId}.pdf"`,
+      });
+
+      res.send(pdfBuffer);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      res.status(500).json({ error: "Failed to generate certificate PDF" });
+    }
+  });
 
   return router;
 }
