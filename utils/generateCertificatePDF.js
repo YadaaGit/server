@@ -21,9 +21,7 @@ export async function generateCertificatePDF({
 }) {
   // Load template + css
   const htmlPath = path.join(__dirname, "../templates/certificate.html");
-  const cssPath  = path.join(__dirname, "../templates/certificate.css");
   let html       = fs.readFileSync(htmlPath, "utf8");
-  const css      = fs.readFileSync(cssPath, "utf8");
 
   // Fix relative asset paths to absolute file:// URLs so Puppeteer can embed them
   const assetsDir  = path.join(__dirname, "../templates/assets");
@@ -48,7 +46,7 @@ export async function generateCertificatePDF({
   const page = await browser.newPage();
 
   // Inline CSS so we don't need network fetches
-  await page.setContent(`<style>${css}</style>${html}`, { waitUntil: "networkidle0" });
+  await page.setContent(html, { waitUntil: "networkidle0" });
   await page.emulateMediaType("screen");
 
   const pdfBuffer = await page.pdf({
