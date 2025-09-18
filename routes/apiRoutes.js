@@ -37,7 +37,7 @@ export default function apiRoutes(models) {
     // Issue a certificate
     router.post("/certificates", async (req, res) => {
       try {
-        const { userName, courseTitle, score, certId } = req.body;
+        const { userName, courseTitle, score, certId, lang } = req.body;
         if (!userName || !courseTitle || !score || !certId) {
           return res.status(400).json({ ok: false, error: "Missing fields" });
         }
@@ -53,6 +53,7 @@ export default function apiRoutes(models) {
           issueDate: new Date(),
           issueUrl,
           verificationUrl,
+          lang: lang || "am", // Save lang in DB for reference
         });
         await certDoc.save();
 
@@ -62,6 +63,7 @@ export default function apiRoutes(models) {
           score,
           certId,
           verificationUrl,
+          lang: lang || "am", // Use the passed language
         });
 
         const pngDir = path.join(process.cwd(), "certificates");

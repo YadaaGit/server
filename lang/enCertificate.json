@@ -1,0 +1,6 @@
+{
+  "certificate_text": "This is to certify that <strong>{{USER_NAME}}</strong> has successfully completed the course \"<strong>{{COURSE_TITLE}}</strong>\" on <strong>{{DATE}}</strong> with a final score of <strong>{{SCORE}}%</strong>. We recognize their dedication and commendable performance!",
+  "certificate_title": "Certificate of Completion",
+  "certificate_subtitle": "Awarded to",
+  "certificate_footer": "Scan the QR code to verify this certificate."
+}

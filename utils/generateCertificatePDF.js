@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "url";
 import puppeteer from "puppeteer";
 import QRCode from "qrcode";
 import os from "os";
+import { getCertificateDict } from "../lang/translate.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +24,7 @@ export async function generateCertificateImage({
   certId,
   verificationUrl,
   issueDate = new Date(),
+  lang = "en", // <--- default to English
 }) {
   // Load template
   const htmlPath = path.join(__dirname, "../templates/certificate.html");
@@ -33,6 +35,16 @@ export async function generateCertificateImage({
   const assetsFile = pathToFileURL(assetsDir).href;
   html = html.replace(/\.\/assets\//g, `${assetsFile}/`);
 
+  // Get translation dictionary
+  const dict = getCertificateDict(lang);
+
+  // Prepare certificate text with replacements
+  let certificateText = dict["certificate_text"]
+    .replace(/{{USER_NAME}}/g, userName)
+    .replace(/{{COURSE_TITLE}}/g, courseTitle ?? "")
+    .replace(/{{SCORE}}/g, String(score ?? ""))
+    .replace(/{{DATE}}/g, formatDate(issueDate));
+
   // Inject data
   const qrDataUrl = await QRCode.toDataURL(verificationUrl);
   html = html
@@ -41,7 +53,11 @@ export async function generateCertificateImage({
     .replace(/{{SCORE}}/g, String(score ?? ""))
     .replace(/{{DATE}}/g, formatDate(issueDate))
     .replace(/{{CERT_ID}}/g, certId)
-    .replace(/{{QR_CODE}}/g, qrDataUrl);
+    .replace(/{{QR_CODE}}/g, qrDataUrl)
+    .replace(
+      /<div class="text">[\s\S]*?<\/div>/,
+      `<div class="text">${certificateText}</div>`
+    );
 
   // Write temporary HTML file
   const tempHtmlPath = path.join(os.tmpdir(), `${certId}.html`);

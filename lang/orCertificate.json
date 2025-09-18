@@ -1,0 +1,6 @@
+{
+  "certificate_text": "Kun ragaa kan ta'uuf <strong>{{USER_NAME}}</strong> koorsii \"<strong>{{COURSE_TITLE}}</strong>\" guutummaatti xumuree <strong>{{DATE}}</strong> irratti bu'aa xumuraa <strong>{{SCORE}}%</strong> argatee milkaa'ina fi kutannoo isaa galateeffanna!",
+  "certificate_title": "Ragaa Xumuraa Koorsoorratti",
+  "certificate_subtitle": "Kan kennamuuf",
+  "certificate_footer": "Ragaa kana mirkaneessuuf QR code kana sakatta'i."
+}

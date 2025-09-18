@@ -1,0 +1,6 @@
+{
+  "certificate_text": "ይህ የሚሰጥዎት ማረጋገጫ ሰነድ ለ <strong>{{USER_NAME}}</strong> በ \"<strong>{{COURSE_TITLE}}</strong>\" ስልጠና በተሳካ ሁኔታ በ <strong>{{DATE}}</strong> ቀን በመጨረሻ ውጤት <strong>{{SCORE}}%</strong> ማሳካት ላይ ያሳየውን ትጋትና ስኬት እናመሰግናለን።",
+  "certificate_title": "የስልጠና ማረጋገጫ",
+  "certificate_subtitle": "ለሚቀርበው",
+  "certificate_footer": "ይህን ማረጋገጫ ለማረጋገጥ ኪያር ኮድ ያስሱ።"
+}
