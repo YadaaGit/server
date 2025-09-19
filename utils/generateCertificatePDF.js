@@ -54,10 +54,7 @@ export async function generateCertificateImage({
     .replace(/{{DATE}}/g, formatDate(issueDate))
     .replace(/{{CERT_ID}}/g, certId)
     .replace(/{{QR_CODE}}/g, qrDataUrl)
-    .replace(
-      /<div class="text">[\s\S]*?<\/div>/,
-      `<div class="text">${certificateText}</div>`
-    );
+    .replace(/{{CERTIFICATE_TEXT}}/g, certificateText);
 
   // Write temporary HTML file
   const tempHtmlPath = path.join(os.tmpdir(), `${certId}.html`);
