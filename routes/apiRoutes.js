@@ -115,6 +115,7 @@ export default function apiRoutes(models) {
           certId: cert.certId,
           issueDate: cert.issueDate,
           verificationUrl: cert.verificationUrl,
+          lang: cert.lang || "am",
         });
 
         res.set({
