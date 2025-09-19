@@ -1,9 +1,18 @@
-import { useLanguage } from "./LanguageContext.jsx";
-import en from "./enCertificate.json" assert { type: "json" };
-import am from "./amCertificate.json" assert { type: "json" };
-import or from "./orCertificate.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
 
-const translations = { en, am, or };
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+function loadJson(filename) {
+  const filePath = path.join(__dirname, filename);
+  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+}
+
+const translations = {
+  en: loadJson("enCertificate.json"),
+  am: loadJson("amCertificate.json"),
+  or: loadJson("orCertificate.json"),
+};
 
 export function getCertificateDict(lang) {
   return translations[lang] || translations.en;
