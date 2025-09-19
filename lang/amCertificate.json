@@ -1,6 +1,6 @@
 {
-  "certificate_text": "ይህ የሚሰጥዎት ማረጋገጫ ሰነድ ለ <strong>{{USER_NAME}}</strong> በ \"<strong>{{COURSE_TITLE}}</strong>\" ስልጠና በተሳካ ሁኔታ በ <strong>{{DATE}}</strong> ቀን በመጨረሻ ውጤት <strong>{{SCORE}}%</strong> ማሳካት ላይ ያሳየውን ትጋትና ስኬት እናመሰግናለን።",
-  "certificate_title": "የስልጠና ማረጋገጫ",
-  "certificate_subtitle": "ለሚቀርበው",
+  "certificate_text": "<strong>{{USER_NAME}}</strong> \"<strong>{{COURSE_TITLE}}</strong>\" ተሰኘውን ስልጠና በ <strong>{{DATE}}</strong> <strong>{{SCORE}}%</strong> ውጤት በማስመዝገብ በስኬት ያጠናቀቀ/ች መሆኑን እናረጋግጣለን፡፡ በዚህ አጋጣሚ የነበረውን/ራትን ትጋት እና የሚደነቅ አፈፃፀም እናደንቃለን!።",
+  "certificate_title": "የምስጋና ምስክር ወረቀት",
+  "certificate_subtitle": "ለ <strong>{{USER_NAME}}</strong>",
   "certificate_footer": "ይህን ማረጋገጫ ለማረጋገጥ ኪያር ኮድ ያስሱ።"
 }
