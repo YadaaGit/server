@@ -132,6 +132,34 @@ export default function apiRoutes(models) {
 
   // ------------------- GENERIC API ROUTES -------------------
 
+    // POST upload image
+  router.post("/:lang/images", upload.single("image"), async (req, res) => {
+    try {
+      const { lang } = req.params;
+      const dbKey = getDbKey(lang);
+
+      if (!models[dbKey])
+        return res.status(400).json({ error: "Invalid collection" });
+
+      const Images = models[dbKey].images;
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+      const newImage = new Images({
+        uid: crypto.randomUUID(),
+        filename: req.file.originalname,
+        contentType: req.file.mimetype,
+        data: req.file.buffer,
+      });
+
+      await newImage.save();
+      res.status(201).json({ uid: newImage.uid });
+    } catch (err) {
+      console.error("❌ Error uploading image:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+
   // GET list
   router.get("/:lang/:resource", async (req, res) => {
     try {
@@ -283,33 +311,6 @@ export default function apiRoutes(models) {
       res.json({ success: true, deleted });
     } catch (err) {
       console.error("❌ Error deleting resource:", err);
-      res.status(500).json({ error: "Server error" });
-    }
-  });
-
-  // POST upload image
-  router.post("/:lang/images", upload.single("image"), async (req, res) => {
-    try {
-      const { lang } = req.params;
-      const dbKey = getDbKey(lang);
-
-      if (!models[dbKey])
-        return res.status(400).json({ error: "Invalid collection" });
-
-      const Images = models[dbKey].images;
-      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-
-      const newImage = new Images({
-        uid: crypto.randomUUID(),
-        filename: req.file.originalname,
-        contentType: req.file.mimetype,
-        data: req.file.buffer,
-      });
-
-      await newImage.save();
-      res.status(201).json({ uid: newImage.uid });
-    } catch (err) {
-      console.error("❌ Error uploading image:", err);
       res.status(500).json({ error: "Server error" });
     }
   });
