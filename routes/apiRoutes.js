@@ -141,7 +141,7 @@ export default function apiRoutes(models) {
       if (!models[dbKey])
         return res.status(400).json({ error: "Invalid collection" });
 
-      const Images = models[dbKey].images;
+      const Images = models[dbKey].Image;
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
       const newImage = new Images({
@@ -324,7 +324,7 @@ export default function apiRoutes(models) {
       if (!models[dbKey])
         return res.status(400).json({ error: "Invalid collection" });
 
-      const Images = models[dbKey].images;
+      const Images = models[dbKey].Image;
       const image = await Images.findOne({ uid });
       if (!image) return res.status(404).json({ error: "Image not found" });
 
